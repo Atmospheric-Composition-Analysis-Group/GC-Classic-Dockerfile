@@ -17,8 +17,7 @@ RUN echo "module load gcc/7" >> /init.rc \
 &&  echo "spack load hdf5" >> /init.rc \
 &&  echo "spack load netcdf" >> /init.rc \
 &&  echo "spack load netcdf-fortran" >> /init.rc \
-&&  echo "export PATH=$PATH:/opt/geos-chem/bin" >> /init.rc \
-&&  echo "source /init.rc" >> /etc/bash.bashrc
+&&  echo "export PATH=$PATH:/opt/geos-chem/bin" >> /init.rc
 
 # Build Standard and copy the executable to /opt/geos-chem/bin
 RUN source /init.rc \
@@ -28,3 +27,9 @@ RUN source /init.rc \
 &&  cp geos /opt/geos-chem/bin/geos-chem-standard
 
 RUN rm -rf /gc-src
+
+RUN echo "#!/usr/bin/env bash" > /usr/bin/start-container.sh \
+&&  echo ". /init.rc" >> /usr/bin/start-container.sh \
+&&  echo 'if [ $# -gt 0 ]; then exec "$@"; else /bin/bash ; fi' >> /usr/bin/start-container.sh \
+&&  chmod +x /usr/bin/start-container.sh
+ENTRYPOINT ["start-container.sh"]
